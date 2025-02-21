@@ -10,4 +10,12 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+export const saveScore = async (score) => {
+  try {
+    await API.post("/score", { score });
+  } catch (err) {
+    console.error("Erreur lors de l'enregistrement du score :", err);
+  }
+};
+
 export default API;
