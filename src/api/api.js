@@ -11,9 +11,11 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const fetchQuestions = () => API.get("/quiz");
+// export const fetchQuestions = () => API.get("/quiz");
 export const submitScore = (score) => API.post("/score", { score });
 export const registerUser = (userData) => API.post("/auth/register", userData);
 export const loginUser = (userData) => API.post("/auth/login", userData);
+export const fetchQuestions = (category) => API.get(`/quiz/${category}`);
+
 
 export default API;
