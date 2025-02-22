@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignorer les fichiers audio
+public/sounds/chrono.mp3
+public/sounds/timeout.mp3
