@@ -7,7 +7,8 @@ import Quiz from "./pages/Quiz";
 import ScoreBoard from "./components/ScoreBoard";
 import Navbar from "./components/Navbar";
 import API from "./api/api";
-import ProtectedRoute from "./components/ProtectedRoute"; // ✅ Import du composant de protection
+import ProtectedRoute from "./components/ProtectedRoute"; // Protège les routes privées
+import PublicRoute from "./components/PublicRoute"; // Empêche l'accès aux pages publiques si connecté
 
 function App() {
   const [user, setUser] = useState(null);
@@ -29,11 +30,25 @@ function App() {
     <Router>
       <Navbar user={user} setUser={setUser} />
       <Routes>
-        {/* Seules ces deux routes sont accessibles sans connexion */}
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/register" element={<Register setUser={setUser} />} />
+        {/* 🔓 Pages accessibles uniquement aux NON-CONNECTÉS */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute user={user}>
+              <Login setUser={setUser} />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute user={user}>
+              <Register setUser={setUser} />
+            </PublicRoute>
+          }
+        />
 
-        {/* 🔐 Toutes ces routes sont protégées */}
+        {/* 🔐 Pages accessibles uniquement aux UTILISATEURS CONNECTÉS */}
         <Route
           path="/"
           element={
