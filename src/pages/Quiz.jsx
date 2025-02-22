@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { fetchQuestions } from "../api/api";
 import QuizCard from "../components/QuizCard";
-import chronoSound from "../sounds/chrono.mp3";
-import timeoutSound from "../sounds/timeout.mp3";
+// import chronoSound from "../sounds/chrono.mp3";
+import chronoSound from '../../public/sounds/chrono.mp3'
+import timeoutSound from '../../public/sounds/timeout.mp3';
+// import timeoutSound from "../sounds/timeout.mp3";
 
 const Quiz = () => {
   const [questions, setQuestions] = useState([]);
