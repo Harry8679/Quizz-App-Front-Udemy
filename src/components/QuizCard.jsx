@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 const QuizCard = ({ question, onAnswer }) => {
   return (
@@ -9,9 +9,9 @@ const QuizCard = ({ question, onAnswer }) => {
           <button
             key={index}
             className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-            onClick={() => onAnswer(option.isCorrect)}
+            onClick={() => onAnswer(option === question.correctAnswer)}
           >
-            {option.text}
+            {option}
           </button>
         ))}
       </div>
