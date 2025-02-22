@@ -15,13 +15,15 @@ const Quiz = () => {
   }, []);
 
   const handleAnswer = (isCorrect) => {
-    if (isCorrect) setScore(score + 1);
+    const newScore = isCorrect ? score + 1 : score;
+    setScore(newScore);
+    
     const nextQuestion = currentQuestion + 1;
     if (nextQuestion < questions.length) {
       setCurrentQuestion(nextQuestion);
     } else {
       setShowResult(true);
-      submitScore(score + 1);
+      submitScore({ score: newScore });
     }
   };
 
