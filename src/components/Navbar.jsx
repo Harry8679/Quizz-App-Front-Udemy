@@ -1,19 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const Navbar = ({ user, setUser }) => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+  const isAuthenticated = !!user; // ✅ Simplifie ta condition en fonction de l'utilisateur directement
 
   useEffect(() => {
-    // Vérifie si l'utilisateur est connecté à chaque changement
-    setIsAuthenticated(!!localStorage.getItem("token"));
-  }, [user]); // Met à jour quand `user` change
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setUser(null);
+    }
+  }, [setUser]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setUser(null); // Met à jour l'état global
-    setIsAuthenticated(false);
+    setUser(null);
     navigate("/login");
   };
 
@@ -23,7 +24,7 @@ const Navbar = ({ user, setUser }) => {
       <div className="flex items-center gap-4">
         {isAuthenticated ? (
           <>
-            <span className="text-green-300">{user?.username || "Utilisateur"}</span>
+            <span className="text-green-300">{user.username || "Utilisateur"}</span>
             <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded hover:bg-red-700">
               Déconnexion
             </button>
