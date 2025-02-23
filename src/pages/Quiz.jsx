@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { fetchQuestions } from "../api/api";
 import QuizCard from "../components/QuizCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Quiz = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams(); // ✅ Récupérer les paramètres de l'URL
+  const category = searchParams.get("category") || "maths"; // 📌 Catégorie choisie
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -22,14 +24,14 @@ const Quiz = () => {
     }
   }, [navigate]);
 
-  // 📌 Charger les questions (Exemple : Maths)
+  // 📌 Charger les questions selon la catégorie choisie
   useEffect(() => {
-    fetchQuestions("maths")
+    fetchQuestions(category)
       .then((res) => setQuestions(res.data))
       .catch((err) => console.error("Erreur chargement des questions :", err));
-  }, []);
+  }, [category]); // ✅ Rafraîchir si la catégorie change
 
-  // 🎵 Charger les sons du dossier `public/sounds`
+  // 🎵 Charger les sons
   const chronoAudio = new Audio("/sounds/chrono.mp3");
   const timeoutAudio = new Audio("/sounds/timeout.mp3");
 
@@ -48,23 +50,23 @@ const Quiz = () => {
     const interval = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
-    
+
     setTimer(interval);
 
     return () => clearInterval(interval);
   }, [timeLeft, quizStarted]);
 
-  // 📌 Gérer la réponse de l'utilisateur
+  // 📌 Gérer la réponse et le passage des questions
   const handleAnswer = (isCorrect) => {
     clearInterval(timer);
-    setTimeLeft(20); // 🔄 Réinitialiser le timer
+    setTimeLeft(20);
 
     if (isCorrect) {
-      setScore(score + 1);
+      setScore((prevScore) => prevScore + 1);
     }
 
     const nextQuestion = currentQuestion + 1;
-    if (nextQuestion < questions.length) {
+    if (nextQuestion < 10) {
       setCurrentQuestion(nextQuestion);
     } else {
       setShowResult(true);
@@ -86,13 +88,7 @@ const Quiz = () => {
       ) : showResult ? (
         <div className="text-center">
           <h2 className="text-3xl font-bold">Quiz terminé 🎉</h2>
-          <p className="text-lg">Votre score : {score} / {questions.length}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="bg-green-500 text-white px-6 py-3 rounded-lg mt-4 hover:bg-green-600"
-          >
-            Rejouer
-          </button>
+          <p className="text-lg">Votre score : {score} / 10</p>
         </div>
       ) : questions.length > 0 ? (
         <div>
