@@ -7,8 +7,7 @@ const Quiz = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || "maths";
-  const difficulty = searchParams.get("difficulty") || "medium";
-
+  const difficulty = searchParams.get("difficulty") || "medium"; // Optionnel
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -17,11 +16,7 @@ const Quiz = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [timer, setTimer] = useState(null);
 
-  const chronoAudio = new Audio("/sounds/chrono.mp3");
-  chronoAudio.loop = true; // 🔁 Répète le son jusqu'à la fin du timer
-  const timeoutAudio = new Audio("/sounds/timeout.mp3");
-
-  // 🔒 Vérification utilisateur connecté
+  // 🔥 Vérification utilisateur connecté
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -30,14 +25,14 @@ const Quiz = () => {
     }
   }, [navigate]);
 
-  // 🔎 Charger les questions selon catégorie et difficulté
+  // 📌 Charger les questions selon catégorie et difficulté
   useEffect(() => {
     fetchQuestions(category, difficulty)
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setQuestions(data);
         } else {
-          console.error("Aucune question trouvée ou données incorrectes :", data);
+          console.error("Format des données incorrect :", data);
           setQuestions([]);
         }
       })
@@ -47,7 +42,10 @@ const Quiz = () => {
       });
   }, [category, difficulty]);
 
-  // 🎵 Gestion des sons et timer
+  // 🎵 Sons du chrono
+  const chronoAudio = new Audio("/sounds/chrono.mp3");
+  const timeoutAudio = new Audio("/sounds/timeout.mp3");
+
   useEffect(() => {
     if (!quizStarted) return;
 
@@ -56,7 +54,6 @@ const Quiz = () => {
     }
 
     if (timeLeft === 0) {
-      chronoAudio.pause();
       timeoutAudio.play().catch(console.error);
       handleAnswer(false);
     }
@@ -66,17 +63,12 @@ const Quiz = () => {
     }, 1000);
 
     setTimer(interval);
-
-    return () => {
-      clearInterval(interval);
-      chronoAudio.pause();
-    };
+    return () => clearInterval(interval);
   }, [timeLeft, quizStarted]);
 
-  // ✅ Gestion de la réponse
+  // 🎯 Gestion des réponses
   const handleAnswer = (isCorrect) => {
     clearInterval(timer);
-    chronoAudio.pause();
     setTimeLeft(20);
 
     if (isCorrect) {
@@ -84,8 +76,7 @@ const Quiz = () => {
     }
 
     const nextQuestion = currentQuestion + 1;
-
-    if (nextQuestion < 10 && nextQuestion < questions.length) {
+    if (nextQuestion < questions.length && nextQuestion < 10) {
       setCurrentQuestion(nextQuestion);
     } else {
       setShowResult(true);
@@ -123,7 +114,7 @@ const Quiz = () => {
           <QuizCard question={questions[currentQuestion]} onAnswer={handleAnswer} />
         </div>
       ) : (
-        <p className="text-center text-gray-500">Chargement du quiz...</p>
+        <p>Chargement du quiz...</p>
       )}
     </div>
   );
