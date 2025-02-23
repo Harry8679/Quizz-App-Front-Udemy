@@ -34,20 +34,17 @@ const Quiz = () => {
   const timeoutAudio = new Audio("/sounds/timeout.mp3");
 
   useEffect(() => {
-    if (!quizStarted) return; // Ne pas jouer le son tant que le quiz n'a pas démarré
+    if (!quizStarted) return;
 
-    // 🔊 Jouer le son du chrono dès le début de la question
     if (timeLeft === 20) {
       chronoAudio.play().catch((err) => console.error("Erreur audio :", err));
     }
 
-    // 🔊 Son de fin + Considérer la réponse comme fausse si le temps expire
     if (timeLeft === 0) {
       timeoutAudio.play().catch((err) => console.error("Erreur audio :", err));
-      handleAnswer(false); 
+      handleAnswer(false);
     }
 
-    // ⏳ Décompte du temps
     const interval = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
@@ -66,7 +63,6 @@ const Quiz = () => {
       setScore(score + 1);
     }
 
-    // 👉 Passer à la question suivante ou afficher le score final
     const nextQuestion = currentQuestion + 1;
     if (nextQuestion < questions.length) {
       setCurrentQuestion(nextQuestion);
@@ -78,7 +74,6 @@ const Quiz = () => {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       {!quizStarted ? (
-        // 🔥 Bouton pour démarrer le quiz après interaction utilisateur
         <div className="text-center">
           <h2 className="text-3xl font-bold">Prêt à jouer ? 🎯</h2>
           <button 
@@ -89,7 +84,6 @@ const Quiz = () => {
           </button>
         </div>
       ) : showResult ? (
-        // 🎉 Affichage du résultat final
         <div className="text-center">
           <h2 className="text-3xl font-bold">Quiz terminé 🎉</h2>
           <p className="text-lg">Votre score : {score} / {questions.length}</p>
@@ -101,7 +95,6 @@ const Quiz = () => {
           </button>
         </div>
       ) : questions.length > 0 ? (
-        // 🔥 Affichage des questions avec Timer
         <div>
           <div className="text-right text-red-500 font-bold text-lg">⏳ {timeLeft}s</div>
           <QuizCard question={questions[currentQuestion]} onAnswer={handleAnswer} />
