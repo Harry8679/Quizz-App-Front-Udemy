@@ -4,18 +4,22 @@ import { useNavigate } from "react-router-dom";
 
 const Login = ({ setUser }) => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await loginUser(form);
-      localStorage.setItem("token", res.data.token);
-      setUser(res.data);
-      navigate("/");
+      const data = await loginUser(form);
+
+      if (data && data.token) {
+        localStorage.setItem("token", data.token);
+        setUser({ username: data.username, userId: data.userId });
+        navigate("/");
+      } else {
+        alert("Identifiants incorrects ou erreur serveur.");
+      }
     } catch (err) {
-      alert("Identifiants incorrects !");
+      alert("Erreur lors de la connexion !");
     }
   };
 
@@ -28,32 +32,25 @@ const Login = ({ setUser }) => {
             type="email"
             placeholder="Email"
             className="w-full p-3 border rounded-lg"
+            value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
           />
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Mot de passe"
-              className="w-full p-3 border rounded-lg"
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-            />
-            <button
-              type="button"
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "🙈" : "👁"}
-            </button>
-          </div>
-          <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition">
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            className="w-full p-3 border rounded-lg"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
+          >
             Se connecter
           </button>
         </form>
-        <p className="text-center text-gray-600 mt-4">
-          Pas encore inscrit ? <a href="/register" className="text-blue-500">Créer un compte</a>
-        </p>
       </div>
     </div>
   );
