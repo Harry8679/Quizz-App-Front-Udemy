@@ -25,3 +25,4 @@ yarn-error.log*
 # Ignorer les fichiers audio
 public/sounds/chrono.mp3
 public/sounds/timeout.mp3
+public/sounds/*.mp3
