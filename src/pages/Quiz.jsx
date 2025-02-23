@@ -5,8 +5,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Quiz = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams(); // ✅ Récupérer les paramètres de l'URL
-  const category = searchParams.get("category") || "maths"; // 📌 Catégorie choisie
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get("category") || "maths";
+  const difficulty = searchParams.get("difficulty") || "medium"; // Optionnel
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -15,7 +16,7 @@ const Quiz = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [timer, setTimer] = useState(null);
 
-  // 🔥 Vérifier si l'utilisateur est connecté
+  // 🔥 Vérification utilisateur connecté
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -24,14 +25,24 @@ const Quiz = () => {
     }
   }, [navigate]);
 
-  // 📌 Charger les questions selon la catégorie choisie
+  // 📌 Charger les questions selon catégorie et difficulté
   useEffect(() => {
-    fetchQuestions(category)
-      .then((res) => setQuestions(res.data))
-      .catch((err) => console.error("Erreur chargement des questions :", err));
-  }, [category]); // ✅ Rafraîchir si la catégorie change
+    fetchQuestions(category, difficulty)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setQuestions(data);
+        } else {
+          console.error("Format des données incorrect :", data);
+          setQuestions([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Erreur chargement des questions :", err);
+        setQuestions([]);
+      });
+  }, [category, difficulty]);
 
-  // 🎵 Charger les sons
+  // 🎵 Sons du chrono
   const chronoAudio = new Audio("/sounds/chrono.mp3");
   const timeoutAudio = new Audio("/sounds/timeout.mp3");
 
@@ -39,11 +50,11 @@ const Quiz = () => {
     if (!quizStarted) return;
 
     if (timeLeft === 20) {
-      chronoAudio.play().catch((err) => console.error("Erreur audio :", err));
+      chronoAudio.play().catch(console.error);
     }
 
     if (timeLeft === 0) {
-      timeoutAudio.play().catch((err) => console.error("Erreur audio :", err));
+      timeoutAudio.play().catch(console.error);
       handleAnswer(false);
     }
 
@@ -52,11 +63,10 @@ const Quiz = () => {
     }, 1000);
 
     setTimer(interval);
-
     return () => clearInterval(interval);
   }, [timeLeft, quizStarted]);
 
-  // 📌 Gérer la réponse et le passage des questions
+  // 🎯 Gestion des réponses
   const handleAnswer = (isCorrect) => {
     clearInterval(timer);
     setTimeLeft(20);
@@ -66,7 +76,7 @@ const Quiz = () => {
     }
 
     const nextQuestion = currentQuestion + 1;
-    if (nextQuestion < 10) {
+    if (nextQuestion < questions.length && nextQuestion < 10) {
       setCurrentQuestion(nextQuestion);
     } else {
       setShowResult(true);
@@ -78,7 +88,7 @@ const Quiz = () => {
       {!quizStarted ? (
         <div className="text-center">
           <h2 className="text-3xl font-bold">Prêt à jouer ? 🎯</h2>
-          <button 
+          <button
             onClick={() => setQuizStarted(true)}
             className="bg-blue-500 text-white px-6 py-3 rounded-lg mt-4 hover:bg-blue-600"
           >
@@ -88,7 +98,15 @@ const Quiz = () => {
       ) : showResult ? (
         <div className="text-center">
           <h2 className="text-3xl font-bold">Quiz terminé 🎉</h2>
-          <p className="text-lg">Votre score : {score} / 10</p>
+          <p className="text-lg">
+            Votre score : {score} / {questions.length > 10 ? 10 : questions.length}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-green-500 text-white px-6 py-3 rounded-lg mt-4 hover:bg-green-600"
+          >
+            Rejouer
+          </button>
         </div>
       ) : questions.length > 0 ? (
         <div>
