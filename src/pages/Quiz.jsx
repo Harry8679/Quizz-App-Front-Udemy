@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchQuestions } from "../api/api";
 import QuizCard from "../components/QuizCard";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -7,14 +7,18 @@ const Quiz = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || "maths";
-  const difficulty = searchParams.get("difficulty") || "medium"; // Optionnel
+  const difficulty = searchParams.get("difficulty") || "medium";
+
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const [quizStarted, setQuizStarted] = useState(false);
-  const [timer, setTimer] = useState(null);
+  const timerRef = useRef(null);
+  
+  const chronoAudio = useRef(new Audio("/sounds/chrono.mp3"));
+  const timeoutAudio = useRef(new Audio("/sounds/timeout.mp3"));
 
   // 🔥 Vérification utilisateur connecté
   useEffect(() => {
@@ -42,33 +46,36 @@ const Quiz = () => {
       });
   }, [category, difficulty]);
 
-  // 🎵 Sons du chrono
-  const chronoAudio = new Audio("/sounds/chrono.mp3");
-  const timeoutAudio = new Audio("/sounds/timeout.mp3");
-
+  // 🎵 Gestion des sons et du timer
   useEffect(() => {
     if (!quizStarted) return;
 
-    if (timeLeft === 20) {
-      chronoAudio.play().catch(console.error);
-    }
+    chronoAudio.current.loop = true;
+    chronoAudio.current.play().catch(console.error);
 
-    if (timeLeft === 0) {
-      timeoutAudio.play().catch(console.error);
-      handleAnswer(false);
-    }
-
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          chronoAudio.current.pause();
+          timeoutAudio.current.play().catch(console.error);
+          handleAnswer(false);
+          return 20;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
-    setTimer(interval);
-    return () => clearInterval(interval);
-  }, [timeLeft, quizStarted]);
+    return () => {
+      clearInterval(timerRef.current);
+      chronoAudio.current.pause();
+    };
+  }, [quizStarted, currentQuestion]);
 
-  // 🎯 Gestion des réponses
+  // ✅ Gestion de la réponse
   const handleAnswer = (isCorrect) => {
-    clearInterval(timer);
+    clearInterval(timerRef.current);
+    chronoAudio.current.pause();
     setTimeLeft(20);
 
     if (isCorrect) {
@@ -76,7 +83,8 @@ const Quiz = () => {
     }
 
     const nextQuestion = currentQuestion + 1;
-    if (nextQuestion < questions.length && nextQuestion < 10) {
+
+    if (nextQuestion < 10 && nextQuestion < questions.length) {
       setCurrentQuestion(nextQuestion);
     } else {
       setShowResult(true);
@@ -114,7 +122,7 @@ const Quiz = () => {
           <QuizCard question={questions[currentQuestion]} onAnswer={handleAnswer} />
         </div>
       ) : (
-        <p>Chargement du quiz...</p>
+        <p className="text-center">Chargement du quiz...</p>
       )}
     </div>
   );
