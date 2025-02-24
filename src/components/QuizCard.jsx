@@ -1,8 +1,8 @@
 import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 
-// Fonction pour nettoyer la chaîne de caractères
-const cleanLatex = (str) => str.replace(/\\\(|\\\)/g, "");
+// Fonction pour bien afficher les espaces
+const cleanLatex = (str) => str.replace(/\\\(|\\\)/g, "").replace(/\s+/g, "~");
 
 const QuizCard = ({ question, onAnswer }) => {
   return (
